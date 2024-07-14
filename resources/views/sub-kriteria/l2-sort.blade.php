@@ -45,7 +45,7 @@
 
                                     {{-- EDIT DATA --}}
                                     <div class="modal fade" id="modelEdit{{ $i->id }}" tabindex="-1"
-                                        role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+                                        role="dialog" aria-labelledby="modelTitleId{{ $i->id }}" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <form action="/sub-kriteria/l2/put/{{ $i->id }}" method="POST">
                                                 <div class="modal-content">
@@ -61,14 +61,16 @@
                                                         @method('PUT')
                                                         <div class="form-group">
                                                             <label>Jenjang Pendidikan</label>
-                                                            <select class="form-control" name="jenjang_id" id="jnu" required>
+                                                            <select class="form-control" name="jenjang_id" id="jnu{{ $i->id }}" required>
+                                                                {{-- Options will be loaded via AJAX --}}
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Level 1</label>
                                                             <input type="text" name="rollbackUrl"
                                                                 value="{{ request()->url() }}" hidden>
-                                                            <select class="form-control" name="l1_id" id="l1u" required>
+                                                            <select class="form-control" name="l1_id" id="l1u{{ $i->id }}" required>
+                                                                {{-- Options will be loaded via AJAX --}}
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
@@ -93,7 +95,7 @@
 
                                     {{-- HAPUS DATA --}}
                                     <div class="modal fade" id="modelHapus{{ $i->id }}" tabindex="-1"
-                                        role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+                                        role="dialog" aria-labelledby="modelTitleId{{ $i->id }}" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <form action="/sub-kriteria/l2/hapus/{{ $i->id }}" method="post">
                                                 <div class="modal-content">
@@ -108,7 +110,7 @@
                                                         @csrf
                                                         @method('delete')
                                                         Apa kamu yakin akan menghapus data <b>{{ $i->name }}</b>
-                                                        penghapusan data bersifat permanet,
+                                                        penghapusan data bersifat permanen,
                                                         dan mungkin akan mengakibatkan kerusakan pada sistem yang
                                                         menggunakan data berelasi.
                                                     </div>
@@ -147,14 +149,11 @@
                         @foreach ($j as $i)
                             <li><a href="{{ url('/sub-kriteria/l2/' . $i->kode) }}">{{ $i->kode }}</a></li>
                         @endforeach
-
                     </ul>
-
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- Modal -->
     <div class="modal fade" id="modelTambah" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
@@ -196,53 +195,59 @@
             </form>
         </div>
     </div>
-
 @endsection
-@section('script')
-    <script>
-        $(document).ready(function() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
 
+@section('script')
+<script>
+    $(document).ready(function() {
+        // Setup AJAX with CSRF token
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // Initial AJAX call to populate jenjang options
+        $.ajax({
+            type: 'POST',
+            url: '{{ route('jn') }}',
+            cache: false,
+            success: function(msg) {
+                $("#jn").html(msg);
+                $("select[id^='jnu']").html(msg);
+            }
+        });
+
+        // Event listener for change on jenjang select in tambah modal
+        $("#jn").change(function() {
+            var jenjang_id = $("#jn").val();
             $.ajax({
                 type: 'POST',
-                url: '{{ route('jn') }}',
+                url: '{{ route('l1n') }}',
+                data: { jenjang_id: jenjang_id },
                 cache: false,
                 success: function(msg) {
-                    $("#jn").html(msg);
-                    $("#jnu").html(msg);
+                    $("#l1").html(msg);
                 }
             });
-
-            $("#jn").change(function() {
-                var jenjang_id = $("#jn").val();
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('l1n') }}',
-                    data: 'jenjang_id=' + jenjang_id,
-                    cache: false,
-                    success: function(msg) {
-                        $("#l1").html(msg);
-                    }
-                });
-            });
-
-            $("#jnu").change(function() {
-                var jenjang_id = $("#jnu").val();
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('l1n') }}',
-                    data: 'jenjang_id=' + jenjang_id,
-                    cache: false,
-                    success: function(msg) {
-                        $("#l1u").html(msg);
-                    }
-                });
-            });
-
         });
-    </script>
+
+        // Event listener for change on jenjang select in edit modals
+        $('select[id^="jnu"]').each(function() {
+            $(this).change(function() {
+                var jenjang_id = $(this).val();
+                var l1_id = $(this).attr('id').replace('jnu', 'l1u');
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ route('l1n') }}',
+                    data: { jenjang_id: jenjang_id },
+                    cache: false,
+                    success: function(msg) {
+                        $('#' + l1_id).html(msg);
+                    }
+                });
+            });
+        });
+    });
+</script>
 @endsection

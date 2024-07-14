@@ -63,18 +63,20 @@
                                                             <label>Jenjang Pendidikan</label>
                                                             <input type="text" name="rollbackUrl"
                                                                 value="{{ request()->url() }}" hidden>
-                                                            <select class="form-control" name="jenjang_id" id="jnu"
-                                                                required>
+                                                            <select class="form-control jenjang-select" name="jenjang_id"
+                                                                id="jnu{{ $i->id }}" required>
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Level 1</label>
-                                                            <select class="form-control" name="l1_id" id="l1u" required>
+                                                            <select class="form-control level1-select" name="l1_id"
+                                                                id="l1u{{ $i->id }}" required>
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Level 2</label>
-                                                            <select class="form-control" name="l2_id" id="l2u" required>
+                                                            <select class="form-control level2-select" name="l2_id"
+                                                                id="l2u{{ $i->id }}" required>
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
@@ -84,8 +86,7 @@
                                                                 placeholder="C1.x.x - Nama" aria-describedby="helpId"
                                                                 value="{{ $i->name }}" required>
                                                             <small id="helpId" class="text-muted">Isi dengan format
-                                                                C1.x.x
-                                                                - Nama</small>
+                                                                C1.x.x - Nama</small>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -115,7 +116,7 @@
                                                         @csrf
                                                         @method('delete')
                                                         Apa kamu yakin akan menghapus data <b>{{ $i->name }}</b>
-                                                        penghapusan data bersifat permanet,
+                                                        penghapusan data bersifat permanen,
                                                         dan mungkin akan mengakibatkan kerusakan pada sistem yang
                                                         menggunakan data berelasi.
                                                     </div>
@@ -154,14 +155,11 @@
                         @foreach ($j as $i)
                             <li><a href="{{ url('/sub-kriteria/l3/' . $i->kode) }}">{{ $i->kode }}</a></li>
                         @endforeach
-
                     </ul>
-
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- Modal -->
     <div class="modal fade" id="modelTambah" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
@@ -179,22 +177,23 @@
                         @csrf
                         <div class="form-group">
                             <label>Jenjang Pendidikan</label>
-                            <select class="form-control" name="jenjang_id" id="jn" required>
+                            <select class="form-control jenjang-select" name="jenjang_id" id="jn" required>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Level 1</label>
-                            <select class="form-control" name="l1_id" id="l1" required>
+                            <input type="text" name="rollbackUrl" value="{{ request()->url() }}" hidden>
+                            <select class="form-control level1-select" name="l1_id" id="l1" required>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Level 2</label>
-                            <select class="form-control" name="l2_id" id="l2" required>
+                            <input type="text" name="rollbackUrl" value="{{ request()->url() }}" hidden>
+                            <select class="form-control level2-select" name="l2_id" id="l2" required>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="">Nama Level 3</label>
-                            <input type="text" name="rollbackUrl" value="{{ request()->url() }}" hidden>
                             <input type="text" name="name" class="form-control" placeholder="C1.x.x - Nama"
                                 aria-describedby="helpId" required>
                             <small id="helpId" class="text-muted">Isi dengan format C1.x.x - Nama</small>
@@ -210,7 +209,8 @@
     </div>
 
 @endsection
-<!-- @section('script')
+
+@section('script')
     <script>
         $(document).ready(function() {
             $.ajaxSetup({
@@ -219,22 +219,24 @@
                 }
             });
 
+            // Load initial data for Jenjang Pendidikan
             $.ajax({
                 type: 'POST',
                 url: '{{ route('jn') }}',
                 cache: false,
                 success: function(msg) {
                     $("#jn").html(msg);
-                    $("#jnu").html(msg);
+                    $("select[id^='jnu']").html(msg);
                 }
             });
 
+            // Load Level 1 based on Jenjang Pendidikan for Add Form
             $("#jn").change(function() {
-                var jenjang_id = $("#jn").val();
+                var jenjang_id = $(this).val();
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('l1n') }}',
-                    data: 'jenjang_id=' + jenjang_id,
+                    data: { jenjang_id: jenjang_id },
                     cache: false,
                     success: function(msg) {
                         $("#l1").html(msg);
@@ -242,45 +244,49 @@
                 });
             });
 
-            $("#jnu").change(function() {
-                var jenjang_id = $("#jnu").val();
+            // Load Level 1 based on Jenjang Pendidikan for Edit Forms
+            $(document).on('change', 'select[id^="jnu"]', function() {
+                var jenjang_id = $(this).val();
+                var l1_id = $(this).attr('id').replace('jnu', 'l1u');
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('l1n') }}',
-                    data: 'jenjang_id=' + jenjang_id,
+                    data: { jenjang_id: jenjang_id },
                     cache: false,
                     success: function(msg) {
-                        $("#l1u").html(msg);
+                        $('#' + l1_id).html(msg);
                     }
                 });
             });
 
-            $("#l1").change(function() {
-                var l1_id = $("#l1").val();
+            // Load Level 2 based on Level 1 for Edit Forms
+            $(document).on('change', 'select[id^="l1u"]', function() {
+                var l1_id = $(this).val();
+                var l2_id = $(this).attr('id').replace('l1u', 'l2u');
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('l2n') }}',
-                    data: 'l1_id=' + l1_id,
+                    data: { l1_id: l1_id },
+                    cache: false,
+                    success: function(msg) {
+                        $('#' + l2_id).html(msg);
+                    }
+                });
+            });
+
+            // Load Level 2 based on Level 1 for Add Form
+            $("#l1").change(function() {
+                var l1_id = $(this).val();
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ route('l2n') }}',
+                    data: { l1_id: l1_id },
                     cache: false,
                     success: function(msg) {
                         $("#l2").html(msg);
                     }
                 });
             });
-
-            $("#l1u").change(function() {
-                var l1_id = $("#l1u").val();
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('l2n') }}',
-                    data: 'l1_id=' + l1_id,
-                    cache: false,
-                    success: function(msg) {
-                        $("#l2u").html(msg);
-                    }
-                });
-            });
-
         });
     </script>
-@endsection -->
+@endsection

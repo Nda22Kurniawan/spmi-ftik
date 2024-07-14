@@ -48,7 +48,7 @@
                                     {{ optional($i->l3)->name }}<br>
                                     {{ optional($i->l4)->name }}<br>
                                     @endif
-                                    {!! $i->indikator->dec !!}
+                                    {!! optional($i->indikator)->dec !!}
                                 </td>
                                 <td>
                                     <div class="dropdown open">
