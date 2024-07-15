@@ -25,9 +25,10 @@
                             <input type="text" name="file_name" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label>Berkas</label>
-                            <input type="file" class="form-control" name="file">
-                            <small id="helpId" class="text-muted">Upload Berkas</small>
+                            <label for="file_link">Tautan Berkas</label>
+                            <input type="url" class="form-control" name="file_link" id="file_link"
+                                placeholder="Masukkan tautan Google Drive" required>
+                            <small id="helpId" class="text-muted">Masukkan tautan berkas dari Google Drive</small>
                         </div>
                         <hr>
                         <div class="form-group">

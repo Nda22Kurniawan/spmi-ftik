@@ -29,8 +29,8 @@
                             <tbody>
                                 @foreach ($berkas as $i)
                                     <tr>
-                                        <td><a href="{{ url('berkas/' . $i->id) }}"
-                                                target="_blank">{{ $i->file_name }}</a>
+                                        <td>
+                                            <a href="{{ $i->file }}" target="_blank">{{ $i->file_name }}</a>
                                         </td>
                                         <td>{!! $i->dec !!}</td>
                                         <td>{{ $i->score }}</td>
@@ -60,8 +60,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="resetNilai" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
-        aria-hidden="true">
+    <div class="modal fade" id="resetNilai" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form action="/element/reset/{{ $element->id }}" method="post">
                 <div class="modal-content">

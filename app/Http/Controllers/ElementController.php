@@ -128,55 +128,38 @@ class ElementController extends Controller
         $id = $request->element_id;
         $element = Element::where('id', $id)->first();
 
-        if ($request->file('file')) {
-            $file = $request->file('file');
-            $md5 = md5($file->getClientOriginalName());
-            $ex = $file->getClientOriginalExtension();
-            $namefile = $md5 . "." . $ex;
+        $fileLink = $request->file_link;
 
-            Berkas::create([
-                'element_id' => $element->id,
-                'prodi_id' => $element->prodi_id,
-                'l1_id' => $element->l1_id,
-                'l2_id' => $element->l2_id,
-                'l3_id' => $element->l3_id,
-                'l4_id' => $element->l4_id,
-                'file_name' => $request->file_name,
-                'file' => $namefile,
-                'dec' => $request->dec,
-                'score' => floatval($request->score),
-            ]);
+        Berkas::create([
+            'element_id' => $element->id,
+            'prodi_id' => $element->prodi_id,
+            'l1_id' => $element->l1_id,
+            'l2_id' => $element->l2_id,
+            'l3_id' => $element->l3_id,
+            'l4_id' => $element->l4_id,
+            'file_name' => $request->file_name,
+            'file' => $fileLink,
+            'dec' => $request->dec,
+            'score' => floatval($request->score),
+        ]);
 
-            $file->move('document', $namefile);
+        $berkaslama = $element->count_berkas;
+        $count_berkas = $berkaslama + 1;
 
-            $berkaslama = $element->count_berkas;
-            $count_berkas = $berkaslama + 1;
+        $b = Berkas::where('element_id', $element->id)->get();
+        $s = $b->sum("score");
+        $avg = $s / $count_berkas;
 
-            $b = Berkas::where('element_id', $element->id)->get();
-            $s = $b->sum("score");
-            $avg = $s / $count_berkas;
+        $element->update([
+            'score_berkas' => $avg,
+            'count_berkas' => $count_berkas,
+        ]);
 
-            $element->update([
-                'score_berkas' => $avg,
-                'count_berkas' => $count_berkas,
-            ]);
+        $hasil_bobot = $element->score_berkas * $element->bobot;
 
-            $hasil_bobot = $element->score_berkas * $element->bobot;
-
-            $element->update([
-                'score_hitung' => $hasil_bobot,
-            ]);
-        } else {
-            $element->update([
-                'score_berkas' => floatval($request->score),
-            ]);
-
-            $scorexbobot = $element->score_berkas * $element->bobot;
-
-            $element->update([
-                'score_hitung' => $scorexbobot,
-            ]);
-        }
+        $element->update([
+            'score_hitung' => $hasil_bobot,
+        ]);
 
         if ($element->min_akreditasi > 0) {
             if ($element->score_hitung >= $element->min_akreditasi) {
@@ -224,6 +207,7 @@ class ElementController extends Controller
     </div>');
         return redirect()->route('element-' . $prodi->kode);
     }
+
 
     public function lihatBerkas(Element $element)
     {
