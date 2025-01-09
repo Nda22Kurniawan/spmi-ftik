@@ -5,23 +5,27 @@
             <div class="alert alert-primary" role="alert">
                 <b>Detail Element</b>
                 <hr>
-                @if (($element->l2_id == 0) & ($element->l3_id == 0) & ($element->l4_id == 0))
+                @if (($element->l2_id == 0) && ($element->l3_id == 0) && ($element->l4_id == 0))
                     <b>{{ $element->l1->name }}</b><br>
-                @elseif($element->l3_id == 0 & $element->l4_id == 0)
+                @elseif($element->l3_id == 0 && $element->l4_id == 0)
                     <b>{{ $element->l1->name }}</b><br>
                     {{ $element->l2->name }}
                 @elseif($element->l4_id == 0)
                     <b>{{ $element->l1->name }}</b><br>
                     {{ $element->l2->name }}<br>
                     {{ $element->l3->name }}
-                @else()
+                @else
                     <b>{{ $element->l1->name }}</b><br>
                     {{ $element->l2->name }}<br>
                     {{ $element->l3->name }}<br>
                     {{ $element->l4->name }}
                 @endif
                 <br>
-                {!! $element->indikator->dec !!}
+                @if ($element->indikator)
+                    {!! $element->indikator->dec !!}
+                @else
+                    <p>Indikator description not available.</p>
+                @endif
                 <hr>
                 <table class="table">
                     <thead>

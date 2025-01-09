@@ -55,7 +55,7 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item" href="{{ url('target/' . Auth::user()->prodi_kode) }}">Target Pencapaian</a>
                 <a class="collapse-item" href="{{ url('data/mahasiswa/' . Auth::user()->prodi_kode) }}">Data
-                    Mahasiswa & Almuni</a>
+                    Mahasiswa & Alumni</a>
             </div>
         </div>
     </li>

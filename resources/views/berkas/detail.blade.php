@@ -66,7 +66,7 @@
                         @csrf
                         @method('delete')
                         Apa kamu yakin akan menghapus data <b>{{ $berkas->file_name }}</b>
-                        penghapusan data bersifat permanet, data yang telah di hapus tidak dapat dikembalikan.
+                        penghapusan data bersifat permanen, data yang telah di hapus tidak dapat dikembalikan.
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

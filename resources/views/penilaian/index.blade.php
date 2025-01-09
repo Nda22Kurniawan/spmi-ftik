@@ -43,7 +43,7 @@
             <hr>
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Diagram Pencapaian</h4>
+                    <h4 class="card-title">Diagram Pencapaian Capaian Prodi</h4>
                     @if (!$target['l1'])
                     <div class="alert alert-primary" role="alert">
                         Program Studi {{ $p ? $p->name : 'N/A' }} belum memiliki target pencapaian, silahkan buat target
@@ -51,6 +51,21 @@
                     </div>
                     @else
                     <canvas id="radarChart" width="300" height="300"></canvas>
+                    @endif
+                </div>
+            </div>
+            <hr>
+            <hr>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Diagram Pencapaian Nilai Keseluruhan</h4>
+                    @if (!$target['l1'])
+                    <div class="alert alert-primary" role="alert">
+                        Program Studi {{ $p ? $p->name : 'N/A' }} belum memiliki target pencapaian, silahkan buat target
+                        pencapaian untuk menampilkan diagram
+                    </div>
+                    @else
+                    <canvas id="radarChart2" width="300" height="300"></canvas>
                     @endif
                 </div>
             </div>
@@ -128,8 +143,7 @@
                                     <b>{{ $i->l1 ? $i->l1->name : 'N/A' }}</b><br>
                                     {{ $i->l2 ? $i->l2->name : 'N/A' }}<br>
                                     {{ $i->l3 ? $i->l3->name : 'N/A' }}<br>
-                                    {{ $i->l4 ? $i->l4->name : 'N/A' }}<br>
-                                    {!! $i->indikator->dec !!}
+                                    {!! $i->indikator ? $i->indikator->dec : 'N/A' !!}
                                 </td>
                                 @endif
                                 <td>
@@ -238,7 +252,7 @@
                         <?= $target['l7']->value ?>, <?= $target['l8']->value ?>,
                         <?= $target['l9']->value ?>,
                         <?= $target['l10']->value ?>, <?= $target['l11']->value ?>,
-                        <?= $target['l12']->value ?>
+                        <?= $target['l12']->value ?>, <?= $target['l13']->value ?>
                     ]
                 },
                 {
@@ -249,7 +263,8 @@
                         <?= $pencapaian['l5'] ?>, <?= $pencapaian['l6'] ?>,
                         <?= $pencapaian['l7'] ?>, <?= $pencapaian['l8'] ?>,
                         <?= $pencapaian['l9'] ?>, <?= $pencapaian['l10'] ?>,
-                        <?= $pencapaian['l11'] ?>, <?= $pencapaian['l12'] ?>
+                        <?= $pencapaian['l11'] ?>, <?= $pencapaian['l12'] ?>,
+                        <?= $pencapaian['l13'] ?>
                     ]
                 }
             ]
@@ -290,6 +305,79 @@
 
     const ctx = document.getElementById('radarChart').getContext('2d');
     new Chart(ctx, options);
+
+    const options2 = {
+        type: 'radar',
+        data: {
+            labels: ["A. Kondisi Eksternal", "B. Profil Unit Pengelola Program Studi",
+                "C.1. Visi, Misi, Tujuan dan Strategi", "C.2. Tata Pamong, Tata Kelola dan Kerjasama",
+                "C.3. Mahasiswa", "C.4. Sumber Daya Manusia", "C.5. Keuangan, Sarana dan Prasarana",
+                "C.6. Pendidikan", "C.7. Penelitian", "C.8. Pengabdian kepada Masyarakat",
+                "C.9. Luaran dan Capaian Tridharma", "D. Suplemen Program Studi", "E. Rencana Pengembangan"
+            ],
+            datasets: [{
+                    label: "Target Program Studi",
+                    backgroundColor: "rgba(200,0,0,0.2)",
+                    data: [<?= $target['l1']->value ?>, <?= $target['l2']->value ?>,
+                        <?= $target['l3']->value ?>,
+                        <?= $target['l4']->value ?>, <?= $target['l5']->value ?>,
+                        <?= $target['l6']->value ?>,
+                        <?= $target['l7']->value ?>, <?= $target['l8']->value ?>,
+                        <?= $target['l9']->value ?>,
+                        <?= $target['l10']->value ?>, <?= $target['l11']->value ?>,
+                        <?= $target['l12']->value ?>, <?= $target['l13']->value ?>
+                    ]
+                },
+                {
+                    label: "Nilai Tercapai",
+                    backgroundColor: "rgba(0,0,200,0.2)",
+                    data: [<?= $pencapaian2['l1'] ?>, <?= $pencapaian2['l2'] ?>,
+                        <?= $pencapaian2['l3'] ?>, <?= $pencapaian2['l4'] ?>,
+                        <?= $pencapaian2['l5'] ?>, <?= $pencapaian2['l6'] ?>,
+                        <?= $pencapaian2['l7'] ?>, <?= $pencapaian2['l8'] ?>,
+                        <?= $pencapaian2['l9'] ?>, <?= $pencapaian2['l10'] ?>,
+                        <?= $pencapaian2['l11'] ?>, <?= $pencapaian2['l12'] ?>,
+                        <?= $pencapaian2['l13'] ?>
+                    ]
+                }
+            ]
+        },
+        options: {
+            onClick: (evt, activeEls, chart) => {
+                const {
+                    x,
+                    y
+                } = evt;
+                let index = -1;
+
+                for (let i = 0; i < chart.scales.r._pointLabelItems.length; i++) {
+                    const {
+                        bottom,
+                        top,
+                        left,
+                        right
+                    } = chart.scales.r._pointLabelItems[i];
+
+                    if (x >= left && x <= right && y >= top && y <= bottom) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index === -1) {
+                    return;
+                }
+
+                const clickedLabel = chart.scales.r._pointLabels[index];
+                var URL = document.URL + "/" + clickedLabel;
+                window.open(URL);
+                console.log(clickedLabel)
+            }
+        }
+    }
+
+    const ctx2 = document.getElementById('radarChart2').getContext('2d');
+    new Chart(ctx2, options2);
 </script>
 
 @endsection

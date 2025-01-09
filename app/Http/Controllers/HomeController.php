@@ -125,6 +125,7 @@ class HomeController extends Controller
             "l10" => Target::where("prodi_id", '=', $prodi->id)->where("l1_id", 10)->first(),
             "l11" => Target::where("prodi_id", '=', $prodi->id)->where("l1_id", 11)->first(),
             "l12" => Target::where("prodi_id", '=', $prodi->id)->where("l1_id", 12)->first(),
+            "l13" => Target::where("prodi_id", '=', $prodi->id)->where("l1_id", 13)->first(),
         ];
 
         $pencapaian = [
@@ -140,6 +141,7 @@ class HomeController extends Controller
             "l10" => Element::where('prodi_id', $prodi->id)->where('l1_id', 10)->sum('score_hitung'),
             "l11" => Element::where('prodi_id', $prodi->id)->where('l1_id', 11)->sum('score_hitung'),
             "l12" => Element::where('prodi_id', $prodi->id)->where('l1_id', 12)->sum('score_hitung'),
+            "l13" => Element::where('prodi_id', $prodi->id)->where('l1_id', 13)->sum('score_hitung'),
 
         ];
         return view('home.diagram.radar', [
@@ -147,7 +149,7 @@ class HomeController extends Controller
             'e' => $element->get(),
             'count_element' => $element->count(),
             'count_berkas' => $element->sum("count_berkas"),
-            'score_hitung' => $element->sum("score_hitung"),
+            'score_hitung' => number_format($element->sum("score_hitung") / 4, 2),
             'terakreditas' => $element->where('status_akreditasi', "Y")->get(),
             'unggul' => $element->where('status_unggul', "Y")->get(),
             'baik' => $element->where('status_baik', "Y")->get(),

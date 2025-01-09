@@ -33,19 +33,14 @@
                             <tr>
                                 <td>{{ $no }}</td>
                                 <td>
-                                    @if ($i->l2_id == 0 && $i->l3_id == 0 && $i->l4_id == 0)
                                     <b><a href="{{ url('element/detail/' . $i->id) }}">{{ optional($i->l1)->name }}</a></b><br>
-                                    @elseif ($i->l3_id == 0 && $i->l4_id == 0)
-                                    <b><a href="{{ url('element/detail/' . $i->id) }}">{{ optional($i->l1)->name }}</a></b><br>
+                                    @if ($i->l2_id)
                                     {{ optional($i->l2)->name }}<br>
-                                    @elseif ($i->l4_id == 0)
-                                    <b><a href="{{ url('element/detail/' . $i->id) }}">{{ optional($i->l1)->name }}</a></b><br>
-                                    {{ optional($i->l2)->name }}<br>
+                                    @endif
+                                    @if ($i->l3_id)
                                     {{ optional($i->l3)->name }}<br>
-                                    @else
-                                    <b><a href="{{ url('element/detail/' . $i->id) }}">{{ optional($i->l1)->name }}</a></b><br>
-                                    {{ optional($i->l2)->name }}<br>
-                                    {{ optional($i->l3)->name }}<br>
+                                    @endif
+                                    @if ($i->l4_id)
                                     {{ optional($i->l4)->name }}<br>
                                     @endif
                                     {!! optional($i->indikator)->dec !!}
@@ -56,10 +51,8 @@
                                             Berkas
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="triggerId">
-                                            <a class="dropdown-item" href="{{ url('element/unggah-berkas/' . $i->id) }}">Unggah
-                                                Berkas</a>
-                                            <a class="dropdown-item" href="{{ url('element/lihat-berkas/' . $i->id) }}">Lihat
-                                                Berkas</a>
+                                            <a class="dropdown-item" href="{{ url('element/unggah-berkas/' . $i->id) }}">Unggah Berkas</a>
+                                            <a class="dropdown-item" href="{{ url('element/lihat-berkas/' . $i->id) }}">Lihat Berkas</a>
                                         </div>
                                     </div>
                                     <hr>
@@ -68,12 +61,9 @@
                                             Ketentuan
                                         </button>
                                         <div class="dropdown-menu" aria-labelledby="triggerId">
-                                            <a class="dropdown-item" href="{{ url('element/syarat-akreditasi/' . $i->id) }}">Syarat
-                                                Perlu Akreditasi</a>
-                                            <a class="dropdown-item" href="{{ url('element/syarat-unggul/' . $i->id) }}">Syarat
-                                                Peringkat Unggul</a>
-                                            <a class="dropdown-item" href="{{ url('element/syarat-baik/' . $i->id) }}">Syarat
-                                                Peringkat Baik Sekali</a>
+                                            <a class="dropdown-item" href="{{ url('element/syarat-akreditasi/' . $i->id) }}">Syarat Perlu Akreditasi</a>
+                                            <a class="dropdown-item" href="{{ url('element/syarat-unggul/' . $i->id) }}">Syarat Peringkat Unggul</a>
+                                            <a class="dropdown-item" href="{{ url('element/syarat-baik/' . $i->id) }}">Syarat Peringkat Baik Sekali</a>
                                         </div>
                                     </div>
                                 </td>

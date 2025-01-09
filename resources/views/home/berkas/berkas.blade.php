@@ -34,8 +34,8 @@
                             <tbody>
                                 @foreach ($b as $i)
                                     <tr>
-                                        <td><a href="{{ url('tabel/view/' . $i->id) }}"
-                                                target="_blank">{{ $i->file_name }}</a>
+                                    <td>
+                                            <a href="{{ $i->file }}" target="_blank">{{ $i->file_name }}</a>
                                         </td>
                                         <td>{!! $i->dec !!}</td>
                                         <td>{{ $i->score }}</td>

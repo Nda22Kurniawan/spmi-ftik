@@ -258,7 +258,8 @@
                         "C.1. Visi, Misi, Tujuan dan Strategi", "C.2. Tata Pamong, Tata Kelola dan Kerjasama",
                         "C.3. Mahasiswa", "C.4. Sumber Daya Manusia", "C.5. Keuangan, Sarana dan Prasarana",
                         "C.6. Pendidikan", "C.7. Penelitian", "C.8. Pengabdian kepada Masyarakat",
-                        "C.9. Luaran dan Capaian Tridharma", "D. Analisis dan Penetapan Program Pengembangan"
+                        "C.9. Luaran dan Capaian Tridharma", "D. Analisis dan Penetapan Program Pengembangan",
+                        "E. Rencana Pengembangan"
                     ],
                     datasets: [{
                             label: "Target Program Studi",
@@ -270,7 +271,7 @@
                                 <?= $target['l7']->value ?>, <?= $target['l8']->value ?>,
                                 <?= $target['l9']->value ?>,
                                 <?= $target['l10']->value ?>, <?= $target['l11']->value ?>,
-                                <?= $target['l12']->value ?>
+                                <?= $target['l12']->value ?>, <?= $target['l13']->value ?>
                             ]
                         },
                         {
@@ -281,7 +282,8 @@
                                 <?= $pencapaian['l5'] ?>, <?= $pencapaian['l6'] ?>,
                                 <?= $pencapaian['l7'] ?>, <?= $pencapaian['l8'] ?>,
                                 <?= $pencapaian['l9'] ?>, <?= $pencapaian['l10'] ?>,
-                                <?= $pencapaian['l11'] ?>, <?= $pencapaian['l12'] ?>
+                                <?= $pencapaian['l11'] ?>, <?= $pencapaian['l12'] ?>,
+                                <?= $pencapaian['l13'] ?>
                             ]
                         }
                     ]

@@ -15,14 +15,21 @@ class ElementController extends Controller
     {
         $kode = basename($request->path());
         $prodi = Prodi::where('kode', $kode)->first();
-        $element = Element::where('prodi_id', $prodi->id)->get();
+
+        // Fetch elements and sort by l1, l2, l3
+        $element = Element::where('prodi_id', $prodi->id)
+            ->orderBy('l1_id')
+            ->orderBy('l2_id')
+            ->orderBy('l3_id')
+            ->orderBy('l4_id')
+            ->get();
 
         return view('element.index', [
             'p' => $prodi,
             'e' => $element,
             'count_element' => $element->count(),
             'count_berkas' => $element->sum("count_berkas"),
-            'score_hitung' => $element->sum("score_hitung"),
+            'score_hitung' => number_format($element->sum("score_hitung") / 4, 2),
         ]);
     }
 
@@ -93,7 +100,7 @@ class ElementController extends Controller
                     'score_berkas' => 0,
                     'score_hitung' => 0,
                     'count_berkas' => 0,
-                    'indikator_id' => $request->ind_id,
+                    // Remove 'indikator_id' if level 4 is filled
                 ];
             }
         } else {
@@ -104,14 +111,15 @@ class ElementController extends Controller
         Element::insert($row);
 
         session()->flash('pesan', '<div class="alert alert-info alert-dismissible fade show" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        <strong>Element Berhasil Dibuat</strong>
-    </div>');
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <strong>Element Berhasil Dibuat</strong>
+</div>');
 
         return redirect()->route('element-' . $prodi->kode);
     }
+
 
 
     public function unggahBerkas(Element $element)
@@ -128,102 +136,81 @@ class ElementController extends Controller
         $id = $request->element_id;
         $element = Element::where('id', $id)->first();
 
-        if ($request->file('file')) {
-            $file = $request->file('file');
-            $md5 = md5($file->getClientOriginalName());
-            $ex = $file->getClientOriginalExtension();
-            $namefile = $md5 . "." . $ex;
-
-            Berkas::create([
-                'element_id' => $element->id,
-                'prodi_id' => $element->prodi_id,
-                'l1_id' => $element->l1_id,
-                'l2_id' => $element->l2_id,
-                'l3_id' => $element->l3_id,
-                'l4_id' => $element->l4_id,
-                'file_name' => $request->file_name,
-                'file' => $namefile,
-                'dec' => $request->dec,
-                'score' => floatval($request->score),
-            ]);
-
-            $file->move('document', $namefile);
-
-            $berkaslama = $element->count_berkas;
-            $count_berkas = $berkaslama + 1;
-
-            $b = Berkas::where('element_id', $element->id)->get();
-            $s = $b->sum("score");
-            $avg = $s / $count_berkas;
-
-            $element->update([
-                'score_berkas' => $avg,
-                'count_berkas' => $count_berkas,
-            ]);
-
-            $hasil_bobot = $element->score_berkas * $element->bobot;
-
-            $element->update([
-                'score_hitung' => $hasil_bobot,
-            ]);
-        } else {
-            $element->update([
-                'score_berkas' => floatval($request->score),
-            ]);
-
-            $scorexbobot = $element->score_berkas * $element->bobot;
-
-            $element->update([
-                'score_hitung' => $scorexbobot,
-            ]);
+        if (!$element) {
+            return redirect()->back()->withErrors(['element' => 'Element not found']);
         }
 
+        $fileLink = $request->file_link;
+        $fileName = $request->file_name;
+        $dec = $request->dec;
+        $score = floatval($request->score);
+
+        if (is_null($fileLink) || is_null($fileName) || is_null($score)) {
+            return redirect()->back()->withErrors(['file' => 'File link, name, and score are required']);
+        }
+
+        Berkas::create([
+            'element_id' => $element->id,
+            'prodi_id' => $element->prodi_id,
+            'l1_id' => $element->l1_id,
+            'l2_id' => $element->l2_id,
+            'l3_id' => $element->l3_id,
+            'l4_id' => $element->l4_id,
+            'file_name' => $fileName,
+            'file' => $fileLink,
+            'dec' => $dec ?? '', // Provide a default value if 'dec' is null
+            'score' => $score,
+        ]);
+
+        $berkaslama = $element->count_berkas;
+        $count_berkas = $berkaslama + 1;
+
+        $b = Berkas::where('element_id', $element->id)->get();
+        $s = $b->sum("score");
+        $avg = $s / $count_berkas;
+
+        $element->update([
+            'score_berkas' => $avg,
+            'count_berkas' => $count_berkas,
+        ]);
+
+        $hasil_bobot = $element->score_berkas * $element->bobot;
+
+        $element->update([
+            'score_hitung' => $hasil_bobot,
+        ]);
+
         if ($element->min_akreditasi > 0) {
-            if ($element->score_hitung >= $element->min_akreditasi) {
-                $element->update([
-                    'status_akreditasi' => 'Y',
-                ]);
-            } else {
-                $element->update([
-                    'status_akreditasi' => 'N',
-                ]);
-            }
+            $element->update([
+                'status_akreditasi' => $element->score_hitung >= $element->min_akreditasi ? 'Y' : 'N',
+            ]);
         }
 
         if ($element->min_unggul > 0) {
-            if ($element->score_hitung >= $element->min_unggul) {
-                $element->update([
-                    'status_unggul' => 'Y',
-                ]);
-            } else {
-                $element->update([
-                    'status_unggul' => 'N',
-                ]);
-            }
+            $element->update([
+                'status_unggul' => $element->score_hitung >= $element->min_unggul ? 'Y' : 'N',
+            ]);
         }
 
         if ($element->min_baik > 0) {
-            if ($element->score_hitung >= $element->min_baik) {
-                $element->update([
-                    'status_baik' => 'Y',
-                ]);
-            } else {
-                $element->update([
-                    'status_baik' => 'N',
-                ]);
-            }
+            $element->update([
+                'status_baik' => $element->score_hitung >= $element->min_baik ? 'Y' : 'N',
+            ]);
         }
 
         $prodi = Prodi::where('id', $element->prodi_id)->first();
 
         session()->flash('pesan', '<div class="alert alert-info alert-dismissible fade show" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        <strong>Berkas berhasil di simpan</strong>
-    </div>');
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <strong>Berkas berhasil di simpan</strong>
+</div>');
+
         return redirect()->route('element-' . $prodi->kode);
     }
+
+
 
     public function lihatBerkas(Element $element)
     {

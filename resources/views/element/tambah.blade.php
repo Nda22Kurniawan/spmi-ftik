@@ -40,15 +40,14 @@
                             <select class="form-control" name="l4_id[]" id="l4" multiple="multiple">
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="bobot-element-container">
                             <label>Bobot Element</label>
-                            <input type="text" class="form-control" name="bobot" required>
-                            <small id="helpId" class="text-muted">Masukan nilai bobot dengan menambahkan titik
-                                3.50</small>
+                            <input type="text" class="form-control" name="bobot">
+                            <small id="helpId" class="text-muted">Masukkan nilai bobot dengan menambahkan titik 3.50</small>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="indikator-section">
                             <label>Indikator</label>
-                            <select class="form-control" name="ind_id" id="ind" required></select>
+                            <select class="form-control" name="ind_id" id="ind"></select>
                         </div>
                         <div class="form-group">
                             <button class="btn-primary btn-sm" type="submit">Simpan</button>
@@ -59,6 +58,7 @@
         </div>
     </div>
 @endsection
+
 @section('script')
     <script>
         $(document).ready(function() {
@@ -71,6 +71,16 @@
             $('#l3').select2();
             $('#l4').select2();
             $('#ind').select2();
+
+            function toggleFields() {
+                if ($('#l4').val().length > 0) {
+                    $('#bobot-element-container').hide();
+                    $('#indikator-section').hide();
+                } else {
+                    $('#bobot-element-container').show();
+                    $('#indikator-section').show();
+                }
+            }
 
             $.ajaxSetup({
                 headers: {
@@ -96,6 +106,15 @@
                     cache: false,
                     success: function(msg) {
                         $("#pro").html(msg);
+                    }
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ route('getInd') }}',
+                    data: 'jenjang_id=' + jenjang_id,
+                    cache: false,
+                    success: function(msg) {
+                        $("#ind").html(msg);
                     }
                 });
             });
@@ -152,31 +171,11 @@
                 });
             });
 
-            $("#jen").change(function() {
-                var jenjang_id = $("#jen").val();
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('getInd') }}',
-                    data: 'jenjang_id=' + jenjang_id,
-                    cache: false,
-                    success: function(msg) {
-                        $("#ind").html(msg);
-                    }
-                });
+            $("#l4").change(function() {
+                toggleFields();
             });
 
-            // $("#ind").change(function() {
-            //     var ind_id = $("#ind").val();
-            //     $.ajax({
-            //         type: 'POST',
-            //         url: '{{ route('getScore') }}',
-            //         data: 'ind_id=' + ind_id,
-            //         cache: false,
-            //         success: function(msg) {
-            //             $("#score").html(msg);
-            //         }
-            //     })
-            // });
+            toggleFields();
         });
     </script>
 @endsection

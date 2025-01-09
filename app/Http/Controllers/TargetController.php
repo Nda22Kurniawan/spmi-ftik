@@ -89,6 +89,11 @@ class TargetController extends Controller
                 'prodi_id' => $id,
                 'value' => 0,
             ],
+            [
+                'l1_id' => 13,
+                'prodi_id' => $id,
+                'value' => 0,
+            ],
         ]);
 
         return redirect()->to('target/' . $prodi->kode);

@@ -61,7 +61,7 @@
                                                         @method('PUT')
                                                         <div class="form-group">
                                                             <label>Jenjang Pendidikan</label>
-                                                            <select class="form-control" name="jenjang_id" id="jnu"
+                                                            <select class="form-control" name="jenjang_id" id="jnu{{ $i->id }}"
                                                                 required>
                                                             </select>
                                                         </div>
@@ -69,17 +69,17 @@
                                                             <label>Level 1</label>
                                                             <input type="text" name="rollbackUrl"
                                                                 value="{{ request()->url() }}" hidden>
-                                                            <select class="form-control" name="l1_id" id="l1u" required>
+                                                            <select class="form-control" name="l1_id" id="l1u{{ $i->id }}" required>
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Level 2</label>
-                                                            <select class="form-control" name="l2_id" id="l2u" required>
+                                                            <select class="form-control" name="l2_id" id="l2u{{ $i->id }}" required>
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Level 3</label>
-                                                            <select class="form-control" name="l3_id" id="l3u" required>
+                                                            <select class="form-control" name="l3_id" id="l3u{{ $i->id }}" required>
                                                             </select>
                                                         </div>
                                                         <div class="form-group">
@@ -89,8 +89,7 @@
                                                                 placeholder="C1.x.x.x - Nama" aria-describedby="helpId"
                                                                 value="{{ $i->name }}" required>
                                                             <small id="helpId" class="text-muted">Isi dengan format
-                                                                C1.x.x.x
-                                                                - Nama</small>
+                                                                C1.x.x.x - Nama</small>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -120,7 +119,7 @@
                                                         @csrf
                                                         @method('delete')
                                                         Apa kamu yakin akan menghapus data <b>{{ $i->name }}</b>
-                                                        penghapusan data bersifat permanet,
+                                                        penghapusan data bersifat permanen,
                                                         dan mungkin akan mengakibatkan kerusakan pada sistem yang
                                                         menggunakan data berelasi.
                                                     </div>
@@ -167,7 +166,6 @@
         </div>
     </div>
 
-
     <!-- Modal -->
     <div class="modal fade" id="modelTambah" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
         aria-hidden="true">
@@ -184,23 +182,25 @@
                         @csrf
                         <div class="form-group">
                             <label>Jenjang Pendidikan</label>
-                            <input type="text" name="rollbackUrl" value="{{ request()->url() }}" hidden>
-                            <select class="form-control" name="jenjang_id" id="jn" required>
+                            <select class="form-control jenjang-select" name="jenjang_id" id="jn" required>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Level 1</label>
-                            <select class="form-control" name="l1_id" id="l1" required>
+                            <input type="text" name="rollbackUrl" value="{{ request()->url() }}" hidden>
+                            <select class="form-control level1-select" name="l1_id" id="l1" required>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Level 2</label>
-                            <select class="form-control" name="l2_id" id="l2" required>
+                            <input type="text" name="rollbackUrl" value="{{ request()->url() }}" hidden>
+                            <select class="form-control level2-select" name="l2_id" id="l2" required>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Level 3</label>
-                            <select class="form-control" name="l3_id" id="l3" required>
+                            <input type="text" name="rollbackUrl" value="{{ request()->url() }}" hidden>
+                            <select class="form-control level3-select" name="l3_id" id="l3" required>
                             </select>
                         </div>
                         <div class="form-group">
@@ -218,8 +218,8 @@
             </form>
         </div>
     </div>
-
 @endsection
+
 @section('script')
     <script>
         $(document).ready(function() {
@@ -229,94 +229,59 @@
                 }
             });
 
+            // Populate jenjang pendidikan dropdowns
             $.ajax({
                 type: 'POST',
                 url: '{{ route('jn') }}',
                 cache: false,
-                success: function(msg) {
-                    $("#jn").html(msg);
-                    $("#jnu").html(msg);
+                success: function(response) {
+                    $("#jn").html(response);
+                    $("select[id^='jnu']").html(response);
                 }
             });
 
-            $("#jn").change(function() {
-                var jenjang_id = $("#jn").val();
+            // Handle change events for dynamically created dropdowns using $(document).on
+            $(document).on('change', "select[id^='jn']", function() {
+                var jenjang_id = $(this).val();
+                var targetId = $(this).attr('id').replace('jn', 'l1');
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('l1n') }}',
-                    data: 'jenjang_id=' + jenjang_id,
+                    data: { jenjang_id: jenjang_id },
                     cache: false,
-                    success: function(msg) {
-                        $("#l1").html(msg);
+                    success: function(response) {
+                        $("#" + targetId).html(response);
                     }
                 });
             });
 
-            $("#jnu").change(function() {
-                var jenjang_id = $("#jnu").val();
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('l1n') }}',
-                    data: 'jenjang_id=' + jenjang_id,
-                    cache: false,
-                    success: function(msg) {
-                        $("#l1u").html(msg);
-                    }
-                });
-            });
-
-            $("#l1").change(function() {
-                var l1_id = $("#l1").val();
+            $(document).on('change', "select[id^='l1']", function() {
+                var l1_id = $(this).val();
+                var targetId = $(this).attr('id').replace('l1', 'l2');
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('l2n') }}',
-                    data: 'l1_id=' + l1_id,
+                    data: { l1_id: l1_id },
                     cache: false,
-                    success: function(msg) {
-                        $("#l2").html(msg);
+                    success: function(response) {
+                        $("#" + targetId).html(response);
                     }
                 });
             });
 
-            $("#l1u").change(function() {
-                var l1_id = $("#l1u").val();
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('l2n') }}',
-                    data: 'l1_id=' + l1_id,
-                    cache: false,
-                    success: function(msg) {
-                        $("#l2u").html(msg);
-                    }
-                });
-            });
-
-            $("#l2").change(function() {
-                var l2_id = $("#l2").val();
+            $(document).on('change', "select[id^='l2']", function() {
+                var l2_id = $(this).val();
+                var targetId = $(this).attr('id').replace('l2', 'l3');
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('l3n') }}',
-                    data: 'l2_id=' + l2_id,
+                    data: { l2_id: l2_id },
                     cache: false,
-                    success: function(msg) {
-                        $("#l3").html(msg);
+                    success: function(response) {
+                        $("#" + targetId).html(response);
                     }
                 });
             });
-
-            $("#l2u").change(function() {
-                var l2_id = $("#l2u").val();
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('l3n') }}',
-                    data: 'l2_id=' + l2_id,
-                    cache: false,
-                    success: function(msg) {
-                        $("#l3u").html(msg);
-                    }
-                });
-            });
-
         });
     </script>
 @endsection
